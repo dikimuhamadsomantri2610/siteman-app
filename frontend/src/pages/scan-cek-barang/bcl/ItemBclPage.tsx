@@ -19,14 +19,56 @@ export default function ItemBclPage() {
 
   // ── PENDING PHASE ─────────────────────────────────────────────────────────
   if (bcl.phase === 'pending') {
+    if (bcl.bclBatches.length === 0) {
+      return (
+        <PendingCard
+          metadata={{ dnDate: '-', loadNum: '-', store: '-', storeName: '-' }}
+          stats={{ total: 0, checked: 0, pending: 0, completionRate: 0 }}
+          totalContainers={0}
+          items={[]}
+          onStartReview={() => {}}
+        />
+      );
+    }
+
     return (
-      <PendingCard
-        metadata={bcl.metadata}
-        stats={bcl.stats}
-        totalContainers={bcl.totalContainers}
-        items={bcl.items}
-        onStartReview={bcl.handleStartReview}
-      />
+      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {/* Page Header */}
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#5294FF] text-white shadow-sm">
+            <ClipboardCheck className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+              CEK ITEM - BARANG CEK LANGSUNG
+            </h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              Terdapat {bcl.bclBatches.length} load master yang menunggu untuk dicek.
+            </p>
+          </div>
+        </div>
+
+        {/* List of batches */}
+        <div className="space-y-6">
+          {bcl.bclBatches.map((batch) => (
+            <PendingCard
+              key={batch.loadNum}
+              metadata={{
+                dnDate: batch.dnDate,
+                loadNum: batch.loadNum,
+                warehouse: batch.warehouse,
+                store: batch.store,
+                storeName: batch.storeName,
+              }}
+              stats={batch.stats}
+              totalContainers={batch.totalContainers}
+              items={batch.items}
+              onStartReview={() => bcl.handleStartReview(batch.loadNum)}
+              showTitle={false}
+            />
+          ))}
+        </div>
+      </div>
     );
   }
 
@@ -75,7 +117,7 @@ export default function ItemBclPage() {
       {/* Scan Box */}
       <ScanBox
         scanInput={bcl.scanInput}
-        onScanInputChange={bcl.setScanInput}
+        onScanInputChange={bcl.handleScanInputChange}
         scanError={bcl.scanError}
         onClearError={() => bcl.setScanError(null)}
         scanInputRef={bcl.scanInputRef}

@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { GoodsItem, Phase, SortField, SortDirection } from './types';
+import { GoodsItem, Phase, SortField, SortDirection, BclReportItem, BclActiveBatch } from './types';
 import rawDataset from '../bcl_nonbcl_dataset.json';
 
 const ITEMS_PER_PAGE = 20;
@@ -12,9 +12,10 @@ const ITEMS_PER_PAGE = 20;
 export const normaliseCid = (cid: string) =>
   cid.length >= 8 ? cid.slice(-8) : cid;
 
-export function useItemBcl() {
+export function useItemBcl(itemType: 'bcl' | 'non-bcl' = 'bcl') {
   // ── Phase ──────────────────────────────────────────────────────────────────
   const [phase, setPhase] = useState<Phase>('pending');
+  const [activeLoadNum, setActiveLoadNum] = useState<string | null>(null);
 
   // ── Items ──────────────────────────────────────────────────────────────────
   const [items, setItems] = useState<GoodsItem[]>(() => {
@@ -23,8 +24,9 @@ export function useItemBcl() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as GoodsItem[];
-        const hasOutdatedTypes = parsed.some((i) => i.type === 'non-bcl');
-        if (!hasOutdatedTypes) return parsed;
+        if (parsed.length > 0 && parsed.some((i) => i.type === 'non-bcl')) {
+          return parsed;
+        }
       } catch {
         // ignore – fallback to rawDataset
       }
@@ -62,43 +64,90 @@ export function useItemBcl() {
   // ── Sync to sessionStorage ─────────────────────────────────────────────────
   useEffect(() => {
     sessionStorage.setItem('all_checking_items', JSON.stringify(items));
-    sessionStorage.setItem('bcl_phase', phase);
-  }, [items, phase]);
+  }, [items]);
 
-  // ── Derived: BCL-only items ────────────────────────────────────────────────
-  const bclItems = useMemo(() => items.filter((i) => i.type === 'bcl'), [items]);
+  // ── Derived: Target items (BCL / Non-BCL) ──────────────────────────────────
+  const targetItems = useMemo(() => items.filter((i) => i.type === itemType), [items, itemType]);
 
-  // ── Derived: stats ─────────────────────────────────────────────────────────
+  // Group active target items into batches by loadNum
+  const bclBatches = useMemo(() => {
+    const map = new Map<string, GoodsItem[]>();
+    targetItems.forEach((item) => {
+      if (!map.has(item.loadNum)) {
+        map.set(item.loadNum, []);
+      }
+      map.get(item.loadNum)!.push(item);
+    });
+
+    const list: BclActiveBatch[] = [];
+    map.forEach((items, loadNum) => {
+      const first = items[0];
+      const total = items.length;
+      const checked = items.filter((i) => i.status === 'checked').length;
+      
+      const seen = new Set<string>();
+      items.forEach((i) => seen.add(normaliseCid(i.containerId)));
+
+      list.push({
+        loadNum,
+        dnDate: first.dnDate,
+        warehouse: first.warehouse,
+        store: first.store,
+        storeName: first.storeName,
+        items,
+        totalContainers: seen.size,
+        stats: {
+          total,
+          checked,
+          pending: total - checked,
+          completionRate: total > 0 ? Math.round((checked / total) * 100) : 0,
+        },
+      });
+    });
+
+    return list.sort((a, b) => b.loadNum.localeCompare(a.loadNum));
+  }, [targetItems]);
+
+  // Current active reviewing items
+  const reviewingItems = useMemo(() => {
+    if (!activeLoadNum) return [];
+    return targetItems.filter((i) => i.loadNum === activeLoadNum);
+  }, [targetItems, activeLoadNum]);
+
+  // stats for active load
   const stats = useMemo(() => {
-    const total = bclItems.length;
-    const checked = bclItems.filter((i) => i.status === 'checked').length;
+    const total = reviewingItems.length;
+    const checked = reviewingItems.filter((i) => i.status === 'checked').length;
     return {
       total,
       checked,
       pending: total - checked,
       completionRate: total > 0 ? Math.round((checked / total) * 100) : 0,
     };
-  }, [bclItems]);
+  }, [reviewingItems]);
 
-  // ── Derived: unique container IDs ──────────────────────────────────────────
+  // unique container IDs for active load
   const allContainerIds = useMemo(() => {
     const seen = new Set<string>();
     const result: string[] = [];
-    for (const item of bclItems) {
+    for (const item of reviewingItems) {
       const cid = normaliseCid(item.containerId);
-      if (!seen.has(cid)) { seen.add(cid); result.push(cid); }
+      if (!seen.has(cid)) {
+        seen.add(cid);
+        result.push(cid);
+      }
     }
     return result;
-  }, [bclItems]);
+  }, [reviewingItems]);
 
   const totalContainers = allContainerIds.length;
 
-  // ── Derived: metadata from first BCL item ──────────────────────────────────
+  // Metadata from active load
   const metadata = useMemo(() => {
-    const s = bclItems[0];
-    if (!s) return { dnDate: '-', loadNum: '-', store: '-', storeName: '-' };
-    return { dnDate: s.dnDate, loadNum: s.loadNum, store: s.store, storeName: s.storeName };
-  }, [bclItems]);
+    const s = reviewingItems[0];
+    if (!s) return { dnDate: "-", loadNum: "-", warehouse: "-", store: "-", storeName: "-" };
+    return { dnDate: s.dnDate, loadNum: s.loadNum, warehouse: s.warehouse, store: s.store, storeName: s.storeName };
+  }, [reviewingItems]);
 
   // ── Derived: modal items for current container ─────────────────────────────
   const modalItems = useMemo(() => {
@@ -119,7 +168,7 @@ export function useItemBcl() {
 
   // ── Derived: filtered + sorted + paginated checked items (rekap table) ─────
   const checkedItems = useMemo(() => {
-    const filtered = bclItems.filter((item) => {
+    const filtered = reviewingItems.filter((item) => {
       if (item.status !== 'checked') return false;
       if (!searchQuery) return true;
       const q = searchQuery.toLowerCase();
@@ -143,7 +192,7 @@ export function useItemBcl() {
       });
     }
     return filtered;
-  }, [bclItems, searchQuery, sortField, sortDirection]);
+  }, [reviewingItems, searchQuery, sortField, sortDirection]);
 
   const totalPages = Math.max(1, Math.ceil(checkedItems.length / ITEMS_PER_PAGE));
 
@@ -165,19 +214,83 @@ export function useItemBcl() {
   };
 
   // ── Phase handlers ─────────────────────────────────────────────────────────
-  const handleStartReview = () => {
+  const handleStartReview = (loadNum: string) => {
+    setActiveLoadNum(loadNum);
     setPhase('reviewing');
     setTimeout(() => scanInputRef.current?.focus(), 300);
   };
 
   const handlePendingAndReturn = () => {
+    setActiveLoadNum(null);
     setPhase('pending');
     toast.success('Pengecekan ditunda. Progress Anda berhasil disimpan.');
   };
 
   const handleSelesaiCek = () => {
+    if (reviewingItems.length === 0) {
+      toast.error('Tidak ada item aktif yang menunggu diselesaikan.');
+      return;
+    }
+
+    const submittedAt = new Date().toISOString();
+    const newReports: BclReportItem[] = reviewingItems.map((item) => {
+      const original = (rawDataset as GoodsItem[]).find((o) => o.id === item.id);
+      const oPck = original?.pck ?? 0;
+      const oPcs = original?.pcs ?? 0;
+      const oTotal = oPck * item.coef + oPcs;
+
+      const isChecked = item.status === 'checked';
+      const cPck = isChecked ? item.pck : 0;
+      const cPcs = isChecked ? item.pcs : 0;
+      const cTotal = isChecked ? item.totalPiece : 0;
+
+      return {
+        id: item.id,
+        dnDate: item.dnDate,
+        loadNum: item.loadNum,
+        store: item.store,
+        storeName: item.storeName,
+        erpOrder: item.erpOrder,
+        aisle: item.aisle,
+        containerId: item.containerId,
+        item: item.item,
+        itemDesc: item.itemDesc,
+        coef: item.coef,
+        originalPck: oPck,
+        originalPcs: oPcs,
+        originalTotalPiece: oTotal,
+        checkedPck: cPck,
+        checkedPcs: cPcs,
+        checkedTotalPiece: cTotal,
+        diffPck: cPck - oPck,
+        diffPcs: cPcs - oPcs,
+        diffTotalPiece: cTotal - oTotal,
+        submittedAt,
+      };
+    });
+
+    let existingReports: BclReportItem[] = [];
+    const saved = localStorage.getItem('bcl_reports');
+    if (saved) {
+      try {
+        existingReports = JSON.parse(saved) as BclReportItem[];
+      } catch {
+        existingReports = [];
+      }
+    }
+
+    const updatedReports = [...newReports, ...existingReports];
+    localStorage.setItem('bcl_reports', JSON.stringify(updatedReports));
+
+    // Remove only submitted items of this type & load from active list
+    const remainingItems = items.filter(
+      (item) => !(item.type === itemType && item.loadNum === activeLoadNum)
+    );
+    saveItems(remainingItems);
+    
+    setActiveLoadNum(null);
     setPhase('pending');
-    toast.success('Pengecekan selesai! Data telah tersimpan.');
+    toast.success(`Pengecekan Load ${activeLoadNum} selesai! Laporan berhasil dipindahkan ke Laporan.`);
   };
 
   // ── Edit item handlers ─────────────────────────────────────────────────────
@@ -217,20 +330,14 @@ export function useItemBcl() {
   };
 
   // ── Scan (container) handlers ──────────────────────────────────────────────
-  const handleScanSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const raw = scanInput.trim().toUpperCase();
-    if (!raw) {
-      setScanError('Tolong masukan no container id yang sesuai');
-      return;
-    }
+  const openContainerModalForQuery = (rawInput: string) => {
+    const raw = rawInput.trim().toUpperCase();
+    if (!raw) return false;
     const query = normaliseCid(raw);
-    const containerItems = items.filter((item) => normaliseCid(item.containerId) === query);
+    const containerItems = reviewingItems.filter((item) => normaliseCid(item.containerId) === query);
 
     if (containerItems.length === 0) {
-      setScanError('Tolong masukan no container id yang sesuai');
-      toast.error(`Container ID "${raw}" tidak ditemukan dalam dataset!`);
-      return;
+      return false;
     }
 
     setScanError(null);
@@ -248,6 +355,29 @@ export function useItemBcl() {
     setModalOpen(true);
     setScanInput('');
     setTimeout(() => modalItemScanRef.current?.focus(), 200);
+    return true;
+  };
+
+  const handleScanSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (openContainerModalForQuery(scanInput)) return;
+
+    const raw = scanInput.trim().toUpperCase();
+    if (!raw) {
+      setScanError('Tolong masukan no container id yang sesuai');
+      return;
+    }
+
+    setScanError('Tolong masukan no container id yang sesuai');
+    toast.error(`Container ID "${raw}" tidak ditemukan dalam load ${activeLoadNum}!`);
+  };
+
+  const handleScanInputChange = (val: string) => {
+    setScanInput(val);
+    if (scanError) setScanError(null);
+    if (val.trim()) {
+      openContainerModalForQuery(val);
+    }
   };
 
   // ── Modal item scan handlers ───────────────────────────────────────────────
@@ -350,12 +480,14 @@ export function useItemBcl() {
   return {
     // Phase
     phase,
+    activeLoadNum,
     handleStartReview,
     handlePendingAndReturn,
     handleSelesaiCek,
 
     // Items & stats
     items,
+    bclBatches,
     stats,
     totalContainers,
     metadata,
@@ -380,6 +512,7 @@ export function useItemBcl() {
     setScanError,
     scanInputRef,
     handleScanSubmit,
+    handleScanInputChange,
 
     // Container modal
     modalOpen,

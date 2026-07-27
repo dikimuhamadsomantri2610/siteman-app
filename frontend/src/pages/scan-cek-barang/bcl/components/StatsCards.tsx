@@ -37,7 +37,7 @@ export default function StatsCards({ stats, totalContainers }: StatsCardsProps) 
       {/* Sudah Cek */}
       <div className="rounded-lg border-2 border-zinc-950 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
         <div className="flex items-center gap-2 mb-3">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-green-500">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#5294FF]">
             <CheckCircle2 className="h-4 w-4 text-white" />
           </div>
           <span className="text-zinc-950 dark:text-white text-xs font-semibold uppercase tracking-wider">
@@ -53,7 +53,7 @@ export default function StatsCards({ stats, totalContainers }: StatsCardsProps) 
       {/* Belum Cek */}
       <div className="rounded-lg border-2 border-zinc-950 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
         <div className="flex items-center gap-2 mb-3">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-500">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#5294FF]">
             <AlertCircle className="h-4 w-4 text-white" />
           </div>
           <span className="text-zinc-950 dark:text-white text-xs font-semibold uppercase tracking-wider">
@@ -68,7 +68,7 @@ export default function StatsCards({ stats, totalContainers }: StatsCardsProps) 
       <div className="rounded-lg border-2 border-zinc-950 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col justify-between">
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-indigo-500">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#5294FF]">
               <TrendingUp className="h-4 w-4 text-white" />
             </div>
             <span className="text-zinc-950 dark:text-white text-xs font-semibold uppercase tracking-wider">

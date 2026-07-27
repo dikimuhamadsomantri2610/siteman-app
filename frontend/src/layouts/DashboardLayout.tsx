@@ -32,7 +32,6 @@ import {
   ChevronDown,
   ClipboardCheck,
   ClipboardX,
-  Upload,
   Bell,
   FileBarChart2,
 } from "lucide-react";
@@ -78,9 +77,9 @@ const navigation: NavItem[] = [
         iconColor: "text-zinc-900 dark:text-white",
       },
       {
-        name: "Upload Master",
-        href: "/scan-cek-barang/upload-master",
-        icon: Upload,
+        name: "Item Non-BCL",
+        href: "/scan-cek-barang/non-bcl",
+        icon: ClipboardCheck,
         iconColor: "text-zinc-900 dark:text-white",
       },
     ],
@@ -92,14 +91,20 @@ const navigation: NavItem[] = [
     iconColor: "text-zinc-900 dark:text-white",
     children: [
       {
-        name: "Report BCL",
-        href: "/report/bcl",
+        name: "Report CSV",
+        href: "/report/csv",
         icon: FileBarChart2,
         iconColor: "text-zinc-900 dark:text-white",
       },
       {
         name: "LSPB BCL",
         href: "/report/lspb/bcl",
+        icon: ClipboardX,
+        iconColor: "text-zinc-900 dark:text-white",
+      },
+      {
+        name: "LSPB Non-BCL",
+        href: "/report/lspb/non-bcl",
         icon: ClipboardX,
         iconColor: "text-zinc-900 dark:text-white",
       },
@@ -164,10 +169,10 @@ const NavLinks = ({
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-zinc-200 dark:bg-zinc-700">
                   <Icon className="h-4 w-4 text-zinc-700 dark:text-zinc-200" />
                 </div>
-                <span className={`truncate flex-1 transition-all duration-300 ease-in-out whitespace-nowrap uppercase ${isSidebarOpen ? "opacity-100 max-w-[200px]" : "opacity-0 max-w-0 pointer-events-none"}`}>
+                <span className={`truncate flex-1 transition-all duration-300 ease-in-out whitespace-nowrap uppercase ${isSidebarOpen ? "opacity-100 max-w-48" : "opacity-0 max-w-0 pointer-events-none"}`}>
                   {item.name}
                 </span>
-                <div className={`transition-all duration-300 ease-in-out ${isSidebarOpen ? "opacity-100 max-w-[20px]" : "opacity-0 max-w-0 pointer-events-none overflow-hidden"}`}>
+                <div className={`transition-all duration-300 ease-in-out ${isSidebarOpen ? "opacity-100 max-w-5" : "opacity-0 max-w-0 pointer-events-none overflow-hidden"}`}>
                   {isOpen ? (
                     <ChevronDown className="h-4 w-4 shrink-0" />
                   ) : (
@@ -177,7 +182,7 @@ const NavLinks = ({
               </div>
 
               {isOpen && (
-                <div className={`ml-2 mt-1 space-y-0.5 border-l-2 border-zinc-200 dark:border-zinc-700 pl-2 transition-all duration-300 ease-in-out ${isSidebarOpen ? "opacity-100 max-h-[500px]" : "opacity-0 max-h-0 pointer-events-none overflow-hidden"}`}>
+                <div className={`ml-2 mt-1 space-y-0.5 border-l-2 border-zinc-200 dark:border-zinc-700 pl-2 transition-all duration-300 ease-in-out ${isSidebarOpen ? "opacity-100 max-h-96" : "opacity-0 max-h-0 pointer-events-none overflow-hidden"}`}>
                   {visibleChildren.map((child) => {
                     const ChildIcon = child.icon;
                     const childActive = location.pathname === child.href;
@@ -191,7 +196,7 @@ const NavLinks = ({
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-secondary">
                           <ChildIcon className={`h-4 w-4 ${child.iconColor ?? ""}`} />
                         </div>
-                        <span className={`truncate transition-all duration-300 ease-in-out whitespace-nowrap uppercase ${isSidebarOpen ? "opacity-100 max-w-[200px]" : "opacity-0 max-w-0 pointer-events-none"}`}>
+                        <span className={`truncate transition-all duration-300 ease-in-out whitespace-nowrap uppercase ${isSidebarOpen ? "opacity-100 max-w-48" : "opacity-0 max-w-0 pointer-events-none"}`}>
                           {child.name}
                         </span>
                       </Link>
@@ -215,7 +220,7 @@ const NavLinks = ({
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-secondary">
               <Icon className={`h-4 w-4 ${item.iconColor ?? ""}`} />
             </div>
-            <span className={`truncate transition-all duration-300 ease-in-out whitespace-nowrap uppercase ${isSidebarOpen ? "opacity-100 max-w-[200px]" : "opacity-0 max-w-0 pointer-events-none"}`}>
+            <span className={`truncate transition-all duration-300 ease-in-out whitespace-nowrap uppercase ${isSidebarOpen ? "opacity-100 max-w-48" : "opacity-0 max-w-0 pointer-events-none"}`}>
               {item.name}
             </span>
           </Link>
@@ -267,7 +272,7 @@ export default function DashboardLayout({
                 alt="logo"
                 className={`transition-all duration-300 ease-in-out ${isSidebarOpen ? "h-5 w-5 mr-2" : "h-6 w-6 mr-0"}`}
               />
-              <span className={`transition-all duration-300 ease-in-out truncate whitespace-nowrap ${isSidebarOpen ? "opacity-100 max-w-[150px]" : "opacity-0 max-w-0 pointer-events-none"}`}>
+              <span className={`transition-all duration-300 ease-in-out truncate whitespace-nowrap ${isSidebarOpen ? "opacity-100 max-w-36" : "opacity-0 max-w-0 pointer-events-none"}`}>
                 SITEMAN
               </span>
             </span>
@@ -392,7 +397,7 @@ export default function DashboardLayout({
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Avatar className="h-9 w-9 cursor-pointer hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0px_0px_var(--color-neo-dark)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none dark:active:shadow-none transition-all duration-100">
+                <Avatar className="h-9 w-9 cursor-pointer hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0px_0px_var(--color-neo-dark)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none dark:active:shadow-none transition-all duration-100">
                   <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold uppercase">
                     {initials}
                   </AvatarFallback>

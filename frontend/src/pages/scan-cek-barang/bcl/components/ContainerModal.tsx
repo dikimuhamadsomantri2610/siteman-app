@@ -123,7 +123,7 @@ export default function ContainerModal({
             </div>
           </div>
           {modalItems.length - modalScannedIds.size > 0 && (
-            <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-2 ml-[52px]">
+            <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-2 ml-13">
               {modalItems.length - modalScannedIds.size} item belum discan dalam container ini
             </p>
           )}

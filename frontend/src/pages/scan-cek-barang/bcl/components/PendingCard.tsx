@@ -1,7 +1,7 @@
 // ─── PendingCard ─────────────────────────────────────────────────────────────
 // Tampilan saat phase === 'pending': info load, statistik, dan tombol mulai.
 
-import { ArrowRight, Calendar, ClipboardCheck, FileText, MapPin } from 'lucide-react';
+import { ArrowRight, Calendar, ClipboardCheck, FileText, MapPin, CheckCircle2, Building2 } from 'lucide-react';
 import { GoodsItem } from '../types';
 
 interface Stats {
@@ -14,6 +14,7 @@ interface Stats {
 interface Metadata {
   dnDate: string;
   loadNum: string;
+  warehouse?: string;
   store: string;
   storeName: string;
 }
@@ -24,6 +25,8 @@ interface PendingCardProps {
   totalContainers: number;
   items: GoodsItem[];
   onStartReview: () => void;
+  showTitle?: boolean;
+  cardTitle?: string;
 }
 
 export default function PendingCard({
@@ -32,23 +35,75 @@ export default function PendingCard({
   totalContainers,
   items,
   onStartReview,
+  showTitle = true,
+  cardTitle = "BARANG CEK LANGSUNG",
 }: PendingCardProps) {
-  return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#5294FF] text-white shadow-sm">
-          <ClipboardCheck className="h-6 w-6" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
-            CEK ITEM - BARANG CEK LANGSUNG
-          </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            {totalContainers} container · {items.length} item menunggu untuk dicek.
-          </p>
+  if (stats.total === 0) {
+    return (
+      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {/* Header */}
+        {showTitle && (
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#5294FF] text-white shadow-sm">
+              <ClipboardCheck className="h-6 w-6" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+                CEK ITEM - {cardTitle.toUpperCase()}
+              </h2>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                Semua pengecekan selesai.
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="rounded-lg border-2 border-zinc-950 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-12 text-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-950 border-2 border-[#5294FF] mb-2">
+              <CheckCircle2 className="h-8 w-8 text-[#5294FF] dark:text-blue-400" />
+            </div>
+            <p className="font-extrabold text-lg text-zinc-800 dark:text-zinc-200 uppercase">
+              Semua Pengecekan {cardTitle} Selesai!
+            </p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm">
+              Tidak ada data {cardTitle} yang menunggu pengecekan. Silakan lihat riwayat hasil cek di halaman <strong>Report Cek</strong> atau <strong>LSPB</strong>.
+            </p>
+            <button
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  sessionStorage.removeItem('all_checking_items');
+                  window.location.reload();
+                }
+              }}
+              className="mt-6 px-5 py-2.5 rounded-md bg-[#5294FF] hover:bg-[#3578e5] text-white text-xs font-bold transition-all border-2 border-zinc-950 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5"
+            >
+              RESET MASTER DUMMY (DEMO)
+            </button>
+          </div>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className={showTitle ? "space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500" : ""}>
+      {/* Header */}
+      {showTitle && (
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#5294FF] text-white shadow-sm">
+            <ClipboardCheck className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+              CEK ITEM - BARANG CEK LANGSUNG
+            </h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              {totalContainers} container · {items.length} item menunggu untuk dicek.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Pending Card */}
       <div className="rounded-lg border-2 border-zinc-950 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
@@ -80,16 +135,25 @@ export default function PendingCard({
             </div>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-zinc-500 dark:text-zinc-400">
               <div className="flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5 shrink-0" />
+                <Calendar className="h-3.5 w-3.5 shrink-0 text-[#5294FF] dark:text-blue-400" />
                 <span className="text-sm font-semibold">{metadata.dnDate}</span>
               </div>
+              {metadata.warehouse && metadata.warehouse !== "-" && (
+                <>
+                  <span className="text-zinc-200 dark:text-zinc-700">·</span>
+                  <div className="flex items-center gap-1.5">
+                    <Building2 className="h-3.5 w-3.5 shrink-0 text-[#5294FF] dark:text-blue-400" />
+                    <span className="text-sm font-semibold">{metadata.warehouse}</span>
+                  </div>
+                </>
+              )}
               <span className="text-zinc-200 dark:text-zinc-700">·</span>
               <div className="flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                <MapPin className="h-3.5 w-3.5 shrink-0 text-[#5294FF] dark:text-blue-400" />
                 <span className="text-sm font-semibold truncate">{metadata.storeName}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <FileText className="h-3.5 w-3.5 shrink-0 text-blue-500" />
+                <FileText className="h-3.5 w-3.5 shrink-0 text-[#5294FF] dark:text-blue-400" />
                 <span className="text-sm font-bold text-[#5294FF] dark:text-blue-400">
                   {metadata.store}
                 </span>

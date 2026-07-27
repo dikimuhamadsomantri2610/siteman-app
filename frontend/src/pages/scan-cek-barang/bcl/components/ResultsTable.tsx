@@ -75,7 +75,7 @@ export default function ResultsTable({
       {/* Table Header / Search */}
       <div className="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800 flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+          <CheckCircle2 className="h-5 w-5 text-[#5294FF] dark:text-blue-400" />
           <h3 className="font-bold text-zinc-900 dark:text-white text-base tracking-tight">
             TABLE HASIL CEK
           </h3>
@@ -141,7 +141,7 @@ export default function ResultsTable({
                   </td>
                   <td className="py-3 px-4 text-zinc-500 dark:text-zinc-400 whitespace-nowrap">{item.aisle}</td>
                   <td className="py-3 px-4 font-semibold text-zinc-900 dark:text-zinc-100 whitespace-nowrap text-xs">{item.item}</td>
-                  <td className="py-3 px-4 text-zinc-900 dark:text-white font-medium whitespace-normal wrap-break-word min-w-[220px]">{item.itemDesc}</td>
+                  <td className="py-3 px-4 text-zinc-900 dark:text-white font-medium whitespace-normal wrap-break-word min-w-55">{item.itemDesc}</td>
                   <td className="py-3 px-4 text-center text-zinc-600 dark:text-zinc-400">{item.coef}</td>
                   <td className="py-3 px-4 text-center font-extrabold text-zinc-900 dark:text-white">{item.pck}</td>
                   <td className="py-3 px-4 text-center text-zinc-600 dark:text-zinc-400">{item.pcs}</td>
