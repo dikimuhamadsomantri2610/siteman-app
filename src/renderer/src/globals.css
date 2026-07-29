@@ -1,0 +1,172 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Light Theme Design System (Matching daily-work-print) ─────────────────── */
+@layer base {
+  :root {
+    --background: 210 40% 98%; /* #f8fafc slate-50 */
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 217.2 91.2% 59.8%; /* #3b82f6 blue-500 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+
+    /* ── Neobrutalism tokens ── */
+    --neo-shadow-color: 0, 0, 0;
+    --neo-shadow: 4px 4px 0px 0px #000000;
+    --neo-shadow-sm: 2px 2px 0px 0px #000000;
+    --neo-shadow-lg: 6px 6px 0px 0px #000000;
+    --neo-border: 2.5px solid #000000;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scrollbar-gutter: stable;
+    -webkit-app-region: no-drag;
+  }
+
+  input, textarea, select, button {
+    -webkit-app-region: no-drag;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Poppins', 'Rubik', system-ui, -apple-system, sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+}
+
+/* ─── Radial Dot Background Pattern (daily-work-print style) ──────────────── */
+.grid-bg {
+  background-color: #f8fafc !important;
+  background-image: radial-gradient(#94a3b8 1.5px, transparent 1.5px) !important;
+  background-size: 24px 24px !important;
+  background-attachment: fixed !important;
+}
+
+/* ─── Neobrutalism Utilities (daily-work-print style) ──────────────────────── */
+@layer components {
+  .neo-card {
+    border: 2.5px solid #000000;
+    box-shadow: 4px 4px 0px 0px #000000;
+    background-color: #ffffff;
+    border-radius: var(--radius);
+    transition: box-shadow 0.1s ease, transform 0.1s ease;
+  }
+  .neo-card:hover {
+    box-shadow: 6px 6px 0px 0px #000000;
+    transform: translate(-1px, -1px);
+  }
+
+  .neo-btn {
+    border: 2.5px solid #000000;
+    box-shadow: 3px 3px 0px 0px #000000;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    border-radius: 6px;
+    transition: box-shadow 0.1s ease, transform 0.1s ease;
+  }
+  .neo-btn:hover {
+    box-shadow: 5px 5px 0px 0px #000000;
+    transform: translate(-1px, -1px);
+  }
+  .neo-btn:active {
+    box-shadow: 1px 1px 0px 0px #000000;
+    transform: translate(2px, 2px);
+  }
+}
+
+/* ─── Custom Scrollbar (daily-work-print style) ───────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* ─── Shimmer Skeleton ─────────────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--secondary)) 50%,
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Soft Slow Scan Glow Animation ────────────────────────────────────────── */
+@keyframes scanGlowSlow {
+  0%, 100% {
+    background-color: rgba(236, 253, 245, 0.95);
+    border-color: rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-color: rgba(16, 185, 129, 0.15);
+  }
+}
+
+.animate-scan-glow {
+  animation: scanGlowSlow 2.5s ease-in-out infinite;
+}
+
+/* ─── Print ────────────────────────────────────────────────────────────────── */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  html, body {
+    width: 210mm;
+    height: 297mm;
+    font-size: 11px;
+  }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

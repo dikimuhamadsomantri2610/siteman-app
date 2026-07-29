@@ -5,15 +5,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
 # Node modules & Build output
 node_modules/
 dist/
 dist-ssr/
-.next/
 out/
-build/
 *.local
 
 # Environment variables
@@ -33,11 +30,11 @@ build/
 *.sln
 *.sw?
 
-# Project specific
+# Old folder structure (migrated to Electron)
 backend/node_modules/
 frontend/node_modules/
 backend/dist/
-frontend/.next/
+frontend/dist/
 
 # AI Agent context files (local only)
 CLAUDE.md
@@ -45,4 +42,3 @@ AGENT.md
 GEMINI.md
 .AGENTS/*
 .agents/*
-

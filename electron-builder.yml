@@ -1,0 +1,23 @@
+appId: com.siteman.app
+productName: Siteman
+directories:
+  buildResources: build
+  output: dist
+
+files:
+  - out/**/*
+  - build/icon.ico
+
+extraFiles:
+  - from: ".env"
+    to: "."
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+
+win:
+  target: nsis
